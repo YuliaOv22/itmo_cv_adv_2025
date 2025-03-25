@@ -7,7 +7,7 @@ Metric Learning ([Домашнее задание 2](https://github.com/aitalent
   --> Brach lab_2
 
 ### Topic 4. Object detection, semantic segmentation and object tracking
-Object detection, semantic segmentation ([Домашнее задание 3](https://github.com/aitalents/computer-vision-technology/tree/main/Topic%204.%20Object%20detection%2C%20semantic%20segmentation%20and%20object%20tracking))
+Object detection ([Домашнее задание 3](https://github.com/aitalents/computer-vision-technology/tree/main/Topic%204.%20Object%20detection%2C%20semantic%20segmentation%20and%20object%20tracking))
   --> Brach lab_3
 
 Object tracking ([Домашнее задание 4](https://github.com/aitalents/computer-vision-technology/tree/main/Topic%204.%20Object%20detection%2C%20semantic%20segmentation%20and%20object%20tracking))
