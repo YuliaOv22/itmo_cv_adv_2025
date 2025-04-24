@@ -1,3 +1,10 @@
+# User
+pigs/
+frames/
+label-studio-data/
+data/
+unique_frames/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
