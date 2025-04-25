@@ -16,3 +16,6 @@ Object tracking ([Домашнее задание 4](https://github.com/aitalent
 ### Topic 5. 3D Computer Vision
 Разработка простейшей системы помощи водителю ([Домашнее задание 5](https://github.com/thegoldenbeetle/3d-cv-assignment))
   --> Brach lab_5
+
+### Topic 7. Pose Estimation
+Виртуальная доска ([Домашнее задание 6](https://github.com/aitalents/computer-vision-technology/blob/main/Topic%207.%20Pose%20Estimation/Homework.md)) --> Brach lab_6
