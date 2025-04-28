@@ -27,15 +27,12 @@ class TrackingMetrics:
                     'has_bbox': bool(obj['bounding_box'])
                 })
                 
-                # Записываем соответствия для расчета метрик
                 self.cb_id_to_tracks[obj['cb_id']].append(obj['track_id'])
                 self.track_id_to_cb[obj['track_id']].append(obj['cb_id'])
                 
-                # Считаем общее количество детекций
                 if obj['bounding_box']:
                     self.total_detections += 1
                 
-                # Проверяем переключения ID
                 if obj['cb_id'] in self.prev_matches:
                     if self.prev_matches[obj['cb_id']] != obj['track_id']:
                         self.id_switches[obj['cb_id']] += 1
@@ -65,7 +62,6 @@ class TrackingMetrics:
             if not cb_ids:
                 continue
                 
-            # Находим наиболее часто встречающийся cb_id для этого track_id
             most_common_cb = max(set(cb_ids), key=cb_ids.count)
             correct += cb_ids.count(most_common_cb)
             total += len(cb_ids)
@@ -80,7 +76,6 @@ class TrackingMetrics:
             if not track_ids:
                 continue
                 
-            # Находим наиболее часто встречающийся track_id для этого cb_id
             most_common_track = max(set(track_ids), key=track_ids.count)
             if track_ids.count(most_common_track) / len(track_ids) > 0.5:
                 correctly_tracked += 1
@@ -95,7 +90,6 @@ class TrackingMetrics:
             if not track_ids:
                 continue
                 
-            # Группируем последовательные одинаковые track_id
             current_id = track_ids[0]
             current_length = 1
             
@@ -123,7 +117,6 @@ class TrackingMetrics:
             if len(track_ids) < 2:
                 continue
                 
-            # Считаем случаи, когда track_id меняется, а потом возвращается
             for i in range(1, len(track_ids)-1):
                 if track_ids[i] != track_ids[i-1] and track_ids[i+1] == track_ids[i-1]:
                     fragmentation += 1
@@ -143,7 +136,6 @@ class TrackingMetrics:
             if not track_ids:
                 continue
                 
-            # Находим доминирующий track_id для этого cb_id
             track_counts = defaultdict(int)
             for tid in track_ids:
                 track_counts[tid] += 1
