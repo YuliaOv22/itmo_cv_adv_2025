@@ -135,3 +135,17 @@ Non-Maximum Suppression оставляет самый уверенный bbox п
 | Val mAP       | **33%** |  **39%**    | **63%**   |
 | Train maP     | **38%**   |  **72%**    | **71%**   |
 | Link to logs  |  [Link](https://api.wandb.ai/links/felisfur-wb/i77sphg5)  | [Link](https://api.wandb.ai/links/felisfur-wb/029ofiy4) | [Link](https://api.wandb.ai/links/felisfur-wb/kzmgiway)|
+
+**Открытый датасет [pigs](https://universe.roboflow.com/pigs-mpgf3/pigs-tlhe1/dataset/16)**
+
+Также был проведен эксперимент с обучением модели на похожем на исходный датасете, включающим в себя классы pig и person. [Логи эксперимента](https://api.wandb.ai/links/felisfur-wb/5b6c7cb7)
+
+Примеры предсказаний модели на датасете
+
+<img width="1170" alt="image" src="https://github.com/user-attachments/assets/226673d6-fed0-4359-9c0d-fde33803b382" />
+
+**Открытый датасет [pigs](https://universe.roboflow.com/pigs-mpgf3/pigs-tlhe1/dataset/16) + исходный датасет**    
+  
+Примеры предсказаний модели на исходном датасете:
+
+<img width="1371" alt="image" src="https://github.com/user-attachments/assets/fce5348c-3ceb-4863-87b0-f48214ede71e" />
