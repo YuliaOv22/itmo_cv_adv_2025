@@ -9,7 +9,7 @@ def mean_average_precision(
     true_boxes: List[Box],
     iou_threshold: float = 0.5,
     box_format: Literal["midpoint", "corners"] = "midpoint",
-    num_classes: int = 20,
+    num_classes: int = 2,
 ) -> float:
     """
     Calculates Mean Average Precision (mAP) over all classes.

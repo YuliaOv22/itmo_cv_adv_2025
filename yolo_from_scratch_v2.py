@@ -1,35 +1,25 @@
 import torch
-import torch.nn as nn
 import pandas as pd
 import os
-import PIL
-import skimage
-from skimage import io
-import numpy as np
-from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import torchvision.transforms as transforms
 import torch.optim as optim
-import torchvision.transforms.functional as FT
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from collections import Counter, defaultdict
 import argparse
 from pathlib import Path
-from typing import Iterable, List, Sequence, Dict, Tuple, Union, Literal
+from typing import Iterable
 from config import *
-# from model_config import architecture_config
-from class_dictionary import class_dictionary
+from class_dictionary import *
 import torchvision.models as models
 from model_scripts.YOLOv1 import YoloV1
 from metrics.YoloLoss import YoloLoss
 from metrics.meanAP import mean_average_precision
 from utils.utils import Compose, get_bboxes, cellboxes_to_boxes
 from utils.VOC_dataset import VOCDataset
-import wandb
 
-seed = 123
+seed = 42
 torch.manual_seed(seed)
 
 sweep_config = {
@@ -181,7 +171,7 @@ def train_one_run(args, config=None):
 
         mobilenet = models.mobilenet_v2(weights=None)
         backbone = mobilenet.features
-        model = YoloV1(backbone=backbone, split_size=7, num_boxes=2, num_classes=3, backbone_out_features=1280).to(DEVICE)
+        model = YoloV1(backbone=backbone, split_size=7, num_boxes=2, num_classes=NUM_CLASSES, backbone_out_features=1280).to(DEVICE)
 
         optimizer = optim.AdamW(
             model.parameters(), lr=wandb.config.lr, weight_decay=WEIGHT_DECAY
@@ -316,7 +306,7 @@ def main(argv:Iterable[str]|None=None):
 
         mobilenet = models.mobilenet_v2(weights=None)
         backbone = mobilenet.features
-        model = YoloV1(backbone=backbone, split_size=7, num_boxes=2, num_classes=3, backbone_out_features=1280).to(DEVICE)
+        model = YoloV1(backbone=backbone, split_size=7, num_boxes=2, num_classes=NUM_CLASSES, backbone_out_features=1280).to(DEVICE)
 
         optimizer = optim.AdamW(
             model.parameters(), lr=wandb.config.lr, weight_decay=WEIGHT_DECAY

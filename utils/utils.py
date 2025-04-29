@@ -1,5 +1,6 @@
 import torch
 from utils.NMS import NMS
+from class_dictionary import NUM_CLASSES
 
 def get_bboxes(
     loader,
@@ -12,7 +13,6 @@ def get_bboxes(
     all_pred_boxes = []
     all_true_boxes = []
 
-    # make sure model is in eval before get bboxes
     model.eval()
     train_idx = 0
 
@@ -49,7 +49,7 @@ def get_bboxes(
 
 
 
-def convert_cellboxes(predictions, S=7, C=3):
+def convert_cellboxes(predictions, S=7, C=NUM_CLASSES):
     """
     Converts bounding boxes output from Yolo with
     an image split size of S into entire image ratios

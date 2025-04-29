@@ -2,10 +2,10 @@ import torch
 import os
 from PIL import Image
 import xml.etree.ElementTree as ET
-
+from class_dictionary import NUM_CLASSES
 
 class VOCDataset(torch.utils.data.Dataset):
-    def __init__(self, df, files_dir, class_dictionary, S=7, B=2, C=3, transform=None):
+    def __init__(self, df, files_dir, class_dictionary, S=7, B=2, C=NUM_CLASSES, transform=None):
         self.annotations = df
         self.files_dir = files_dir
         self.transform = transform

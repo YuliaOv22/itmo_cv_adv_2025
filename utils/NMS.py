@@ -1,4 +1,4 @@
-from typing import Iterable, List, Sequence, Dict, Tuple, Union, Literal
+from typing import List, Union, Literal
 import torch
 from utils.intersection_over_union import intersection_over_union
 
