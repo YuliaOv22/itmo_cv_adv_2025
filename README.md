@@ -26,19 +26,6 @@
 - разрешение кадра: `1700x1700`
 - частота кадров: `10.0 FPS`
 
-Структура исходных данных:
-
-
-```plaintext
-scripts/
-│   └── count_files.py
-│   └── get_frames.py
-│   └── get_unique_frames.py
-│   └── replace_names_labels.py
-.gitignore
-README.md
-```
-
 Pipeline:
 
 1. Разрезание видео на кадры и ресайз до 448х448
