@@ -54,8 +54,98 @@ Pipeline:
 
 ### Этап 2. Разработка архитектуры модели и обучение
 
-Backbone - ResNet-50
+*Backbone - MobileNetV2*
 
+#### 1. Класс архитектуры YOLOv1
+```
+./model_scripts/YOLOv1.py
+```
+Состоит из:
+- Backbone (можно использовать любой, в данной работе - MobileNetV2)
+- FullyConnectedLayer
+
+Возвращает для каждой ячейки вектор размерности $S × S × (C + 5B)$: 
+- предсказания по классам (C - количество классов) и предсказания по bbox'ам (5 параметров: x, y, w, h, conf)
+
+#### 2. YOLOv1 Loss
+
+```
+./metrics/YoloLoss.py
+```
+
+Вычисляет IoU (./utils/intersection_over_union.py) и выбирает наиболее подходящий target'ному объекту bbox.  
+
+Затем считает:
+- Box Loss (ошибка координат)
+- Object Loss
+- No Object Loss (ошибка для ячеек без объекта)
+- Class Loss (ошибка классификации)
 
 ### Этап 3. Реализация NMS
 
+```
+./utils/NMS.py
+```
+
+Non-Maximum Suppression оставляет самый уверенный bbox предсказанного объекта, таким образом, вместо большого количества предсказанных bbox'ов для одного объекта остается наиболее корректный.
+
+### Этап 4. Реализация mAP
+
+```
+./metrics/meanAP.py
+```
+Эта функция считает метрику Mean Average Precision (mAP). 
+  
+- Для каждого класса отдельно собираются предсказанные боксы и правильные боксы
+- Самые уверенные предсказания проверяются первыми
+- Сравниваются предсказанные боксы с реальными через IoU (Если IoU достаточно большой и объект ещё не был найден — это True Positive (TP), иначе — это False Positive (FP))
+- Считаются точность (Precision) и полнота (Recall) по мере роста количества предсказаний
+- Подсчёт площади под кривой Precision-Recall (Average Precision)
+- Среднее по всем классам (mAP)
+
+### Этап 5. Подбор гиперпараметров
+
+Для поиска оптимальных гиперпараметров был использован [W&B Sweeps](https://wandb.ai/site/sweeps/)
+
+### Этап 6. Логирование
+
+В качестве инструмента логирования был использован W&B
+
+## Ход работы над обучением модели
+
+**Открытый датасет [Pig Detection](https://universe.roboflow.com/new-workspace-7kudj/pig-detection-zwty1/dataset/1)**
+
+Так как исходный датасет был довольно небольшим, в дополнение был взят датасет открытый датасет [Pig Detection](https://universe.roboflow.com/new-workspace-7kudj/pig-detection-zwty1/dataset/1)
+
+Данный датасет состоял из двух классов - sitpig (сидящая свинья) и standpig (стоящая свинья). На данном датасете качество реализованной модели (mAP50) получилось равным **96,4%**. [Логи эксперимента](https://api.wandb.ai/links/felisfur-wb/pi4fijch) 
+  
+Примеры детекции:
+
+<img width="715" alt="image" src="https://github.com/user-attachments/assets/5b88a35f-68f3-4ace-a59a-2108374089d8" />
+
+**Исходный датасет**
+
+Затем оба класса (sitpig и standpig) были объединены в один класс - pig, чтобы совместить этот датасет и исходный датасет. С помощью этих данных были проведены 3 эксперимента: 
+- обучение и валидация только на исходном датасете
+- обучение на исходном и открытом датасете, валидация на исходном датасете
+- обучение и валидация на обоих датасетах (для проверки)
+
+|               | Only Base Data | Base + Open Train / Base Val | Base + Open Data |
+| ------------- | -------------  | -------------  | -------------  |
+| Val mAP       | **33%** |  **39%**    | **63%**   |
+| Train maP     | **38%**   |  **72%**    | **71%**   |
+| Link to logs  |  [Link](https://api.wandb.ai/links/felisfur-wb/i77sphg5)  | [Link](https://api.wandb.ai/links/felisfur-wb/029ofiy4) | [Link](https://api.wandb.ai/links/felisfur-wb/kzmgiway)|
+
+**Открытый датасет [pigs](https://universe.roboflow.com/pigs-mpgf3/pigs-tlhe1/dataset/16)**
+
+Также был проведен эксперимент с обучением модели на похожем на исходный датасете, включающим в себя классы pig и person. [Логи эксперимента](https://api.wandb.ai/links/felisfur-wb/5b6c7cb7)
+
+Примеры предсказаний модели на датасете
+
+<img width="1170" alt="image" src="https://github.com/user-attachments/assets/226673d6-fed0-4359-9c0d-fde33803b382" />
+
+**Открытый датасет [pigs](https://universe.roboflow.com/pigs-mpgf3/pigs-tlhe1/dataset/16) + исходный датасет**    
+  
+Примеры предсказаний модели на исходном датасете:
+
+<img width="1371" alt="image" src="https://github.com/user-attachments/assets/fce5348c-3ceb-4863-87b0-f48214ede71e" />
