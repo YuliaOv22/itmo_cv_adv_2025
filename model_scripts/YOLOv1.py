@@ -33,7 +33,7 @@ class YoloV1(nn.Module):
         S, B, C = split_size, num_boxes, num_classes
         return nn.Sequential(
             nn.Linear(backbone_out_features * S * S, 4096),
-            nn.Dropout(0.0),
+            nn.Dropout(0.5),
             nn.LeakyReLU(0.1, inplace=True),
             nn.Linear(4096, S * S * (C + 5 * B)),
         )
