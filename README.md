@@ -113,6 +113,8 @@ Non-Maximum Suppression оставляет самый уверенный bbox п
 
 ## Ход работы над обучением модели
 
+**Открытый датасет [Pig Detection](https://universe.roboflow.com/new-workspace-7kudj/pig-detection-zwty1/dataset/1)**
+
 Так как исходный датасет был довольно небольшим, в дополнение был взят датасет открытый датасет [Pig Detection](https://universe.roboflow.com/new-workspace-7kudj/pig-detection-zwty1/dataset/1)
 
 Данный датасет состоял из двух классов - sitpig (сидящая свинья) и standpig (стоящая свинья). На данном датасете качество реализованной модели (mAP50) получилось равным **96,4%**. [Логи эксперимента](https://api.wandb.ai/links/felisfur-wb/pi4fijch) 
@@ -120,6 +122,8 @@ Non-Maximum Suppression оставляет самый уверенный bbox п
 Примеры детекции:
 
 <img width="715" alt="image" src="https://github.com/user-attachments/assets/5b88a35f-68f3-4ace-a59a-2108374089d8" />
+
+**Исходный датасет**
 
 Затем оба класса (sitpig и standpig) были объединены в один класс - pig, чтобы совместить этот датасет и исходный датасет. С помощью этих данных были проведены 3 эксперимента: 
 - обучение и валидация только на исходном датасете
