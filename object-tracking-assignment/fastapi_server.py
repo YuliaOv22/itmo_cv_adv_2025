@@ -7,22 +7,23 @@ import os
 import re
 import subprocess
 import sys
+import traceback
 from io import BytesIO
 
 import cv2
 import numpy as np
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from fastapi import FastAPI, WebSocket
-from metrics_other import MetricsAccumulator
-from PIL import Image
-
 from metrics import TrackingMetrics
+from PIL import Image
+from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 MAX_DISTANCE_THRESHOLD = 400
 INITIAL_TTL = 6
 
 app = FastAPI(title='Tracker assignment')
 imgs = glob.glob('imgs/*')
+
 
 
 def euclidean_distance(x : np.ndarray, y : np.ndarray):
@@ -39,6 +40,7 @@ def calculate_centroid(bbox: list):
 def find_best_match(centroid, available_tracks):
     best_id = None
     best_distance = MAX_DISTANCE_THRESHOLD
+    
     for track_id, track_info in available_tracks.items():
         if track_info['centroid'] is not None:
             dist = euclidean_distance(np.array(track_info['centroid']), np.array(centroid))
@@ -108,6 +110,7 @@ def tracker_soft(el):
                 }
             else:
                 tracker_soft.next_id = max(list(tracker_soft.used_ids_history)) + 1
+                
                 x['track_id'] = tracker_soft.next_id
                 used_prev_ids.add(tracker_soft.next_id)
                 tracker_soft.used_ids_history.add(tracker_soft.next_id)
@@ -120,6 +123,7 @@ def tracker_soft(el):
         else:
             available_tracks = {k: v for k, v in tracker_soft.prev_tracks.items() 
                               if k not in used_prev_ids and v['ttl'] > 0}
+            
             if available_tracks:
                 best_id = max(available_tracks.items(), key=lambda item: item[1]['ttl'])[0]
                 x['track_id'] = best_id
@@ -141,11 +145,20 @@ def tracker_soft(el):
     return el
 
 
-def xyxy2xywh(bbox):
-    x_1, y_1, x_2, y_2 = bbox
-    h = y_2 - y_1
-    w = x_2 - x_1
-    return [x_1, y_1, w, h]
+def xyxy2xywh(bbox, frame_shape=None):
+    x1, y1, x2, y2 = bbox
+
+    if frame_shape:
+        h_img, w_img, _ = frame_shape
+        x1 = max(0, min(x1, w_img - 1))
+        x2 = max(0, min(x2, w_img - 1))
+        y1 = max(0, min(y1, h_img - 1))
+        y2 = max(0, min(y2, h_img - 1))
+
+    w = max(0, x2 - x1)
+    h = max(0, y2 - y1)
+
+    return [x1, y1, w, h]
 
 
 def tracker_strong(tracker, el, dir_frames):
@@ -174,13 +187,13 @@ def tracker_strong(tracker, el, dir_frames):
         tracker.deepsort = DeepSort(
             max_age=12,
             n_init=3,
-            nms_max_overlap=1.0,
-            max_cosine_distance=0.3,
+            nms_max_overlap=0.8,
+            max_cosine_distance=0.5,
             nn_budget=None,
             override_track_class=None,
             embedder="mobilenet",
             half=True,
-            bgr=True,
+            bgr=False,
             embedder_gpu=True,
             embedder_model_name=None,
             embedder_wts=None,
@@ -193,19 +206,22 @@ def tracker_strong(tracker, el, dir_frames):
 
     frame_img = cv2.imread(f'{dir_frames}/frame_{el["frame_id"]}.png')
     frame_img = cv2.cvtColor(frame_img, cv2.COLOR_BGR2RGB)
-
+   
+    # Подготовка детекций в нужном формате
     detections = []
     index_to_obj = []
     for idx, x in enumerate(el['data']):
         if x['bounding_box']:
-            detections.append((xyxy2xywh(x['bounding_box']), 1, 1))
+            detections.append((xyxy2xywh(x['bounding_box'], frame_shape=frame_img.shape), 1, 1))  # bbox, confidence, class_id
             index_to_obj.append(idx)
 
+    #  Ищем треки
     if detections:
         found_tracks = tracker.deepsort.update_tracks(detections, frame=frame_img)
     else:
         found_tracks = []
 
+    # Сопоставляем треки объектам с bbox
     detections_track = {item.track_id: calculate_centroid(item.to_ltrb()) for item in found_tracks if item.is_confirmed()}
     current_ids = set()
 
@@ -220,11 +236,13 @@ def tracker_strong(tracker, el, dir_frames):
             tracker.used_ids_history.add(best_id)
             del detections_track[best_id]
 
+    # Объекты без bbox
     used_extra_ids = set()
     for x in el['data']:
         if x['bounding_box']:
-            continue 
+            continue  # Уже обработано выше
 
+        # Пробуем сопоставить с активными extra треками
         available_tracks = {k: v for k, v in tracker.extra_tracks.items() if v['ttl'] > 0 and k not in used_extra_ids}
         if available_tracks:
             best_id = max(available_tracks.items(), key=lambda item: item[1]['ttl'])[0]
@@ -233,6 +251,7 @@ def tracker_strong(tracker, el, dir_frames):
             used_extra_ids.add(best_id)
             current_ids.add(best_id)
         else:
+            # Новый track_id
             if tracker.used_ids_history:
                 new_id = max([int(x) for x in tracker.used_ids_history]) + 1
             else:
@@ -253,9 +272,13 @@ def tracker_strong(tracker, el, dir_frames):
 
 
 def save_results_to_md(results: list, file_path: str) -> None:
-    with open(file_path, 'w') as file:
-        file.write("| Объекты | random_range | bb_skip_percent | ID Precision | ID Switch Count | Mismatch Ratio |\n")
-        file.write("|:-------:|:------------:|:---------------:|:------------:|:---------------:|:--------------:|\n")
+    file_exists = os.path.exists(file_path)
+    
+    with open(file_path, 'a' if file_exists else 'w') as file:
+        if not file_exists:
+            file.write("| Объекты | random_range | bb_skip_percent | ID Precision | ID Switch Count | Mismatch Ratio |\n")
+            file.write("|:-------:|:------------:|:---------------:|:------------:|:---------------:|:--------------:|\n")
+        
         for result in results:
             file.write(f"| {result['objects']} | {result['random_range']} | {result['bb_skip_percent']} | {result['ID Precision']} | {result['ID Switch Count']} | {result['Mismatch Ratio']} |\n")
 
@@ -264,64 +287,68 @@ def save_results_to_md(results: list, file_path: str) -> None:
 async def websocket_endpoint(websocket: WebSocket):
     print('Accepting client connection...')
     await websocket.accept()
-    tracks_amount_values = [5, 10, 20]
-    # tracks_amount_values = [5]
 
-    random_range_values = [2, 5]
-    bb_skip_percent_values = [0.2, 0.4]
+    # tracks_amount = 5
+    # tracks_amount = 10
+    tracks_amount = 20
+
+
+    # random_range = 2
+    random_range = 5
+
+    # bb_skip_percent = 0.2
+    bb_skip_percent = 0.4
+
+
+    module_name = f'obj{tracks_amount}.obj{tracks_amount}_{random_range}_{str(bb_skip_percent).replace(".","")}'
+    dir = f'./obj{tracks_amount}/obj{tracks_amount}_{random_range}_{str(bb_skip_percent).replace(".","")}'
+    
+    print(f"Importing module: {module_name}")
+    mod = importlib.import_module(module_name)
+
+    country_balls_amount = mod.country_balls_amount
+    track_data = mod.track_data
+    print(f"Running tracking for country_balls_amount = {country_balls_amount}")
+
+    country_balls = [{'cb_id': x, 'img': imgs[x % len(imgs)]} for x in range(country_balls_amount)]
+    print('Started')
 
     tracker = DeepSort()
-    results = []
+    metrics = TrackingMetrics()
 
-    for tracks_amount in tracks_amount_values:
-        for random_range in random_range_values:
-            for bb_skip_percent in bb_skip_percent_values:
-                module_name = f'obj{tracks_amount}.obj{tracks_amount}_{random_range}_{str(bb_skip_percent).replace(".","")}'
-                dir = f'./obj{tracks_amount}/obj{tracks_amount}_{random_range}_{str(bb_skip_percent).replace(".","")}'
-                print(len(os.listdir(dir)))
-                print(f"Importing module: {module_name}")
-                mod = importlib.import_module(module_name)
+    await websocket.send_text(str(country_balls))
 
-                country_balls_amount = mod.country_balls_amount
-                track_data = mod.track_data
-                print(f"Running tracking for country_balls_amount = {country_balls_amount}")
+    for el in track_data:
+        await asyncio.sleep(1)
+        el = tracker_soft(el)
 
-                country_balls = [{'cb_id': x, 'img': imgs[x % len(imgs)]} for x in range(country_balls_amount)]
-                print('Started')
+        # el = tracker_strong(tracker, el, dir)
+        await websocket.send_json(el)
 
-                metrics = TrackingMetrics()
+        metrics.add_frame(el)
 
-                await websocket.send_text(str(country_balls))
+    metrics_dict = metrics.calculate_metrics()
+    result = {
+        'objects': tracks_amount,
+        'random_range': random_range,
+        'bb_skip_percent': bb_skip_percent,
+        'ID Precision': metrics_dict['id_precision'],
+        'ID Switch Count': metrics_dict['id_switch_count'],
+        'Mismatch Ratio': metrics_dict['mismatch_ratio']
+    }
 
-                for el in track_data:
-                    await asyncio.sleep(0.5)
-                    # el = tracker_soft(el)
-                    el = tracker_strong(tracker, el, dir)
+    results = [result]
 
-                    metrics.add_frame(el)
-                    await websocket.send_json(el)
+    # save_results_to_md(results, 'strong_tracking_results.md')
+    save_results_to_md(results, 'soft_tracking_results.md')
 
-                metrics_dict = metrics.calculate_metrics()
 
-                result = {
-                    'objects': tracks_amount,
-                    'random_range': random_range,
-                    'bb_skip_percent': bb_skip_percent,
-                    'ID Precision': metrics_dict['id_precision'],
-                    'ID Switch Count': metrics_dict['id_switch_count'],
-                    'Mismatch Ratio': metrics_dict['mismatch_ratio']
-                }
+    print(f'Metrics for {tracks_amount} tracks, random_range = {random_range}, bb_skip_percent = {bb_skip_percent}')
+    metrics.report()
 
-                results.append(result)
-                print(f'Metrics for {tracks_amount} tracks, random_range = {random_range}, bb_skip_percent = {bb_skip_percent}')
-                metrics.report()
-
-    # Save results to markdown file after processing all
-    save_results_to_md(results, 'strong_tracking_results.md')
-
+    await asyncio.sleep(0.5)
     print('Bye..')
-    # break
-    websocket.close()
+    await websocket.close()
 
 
 # @app.websocket("/ws")
@@ -346,8 +373,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
 #                 country_balls = [{'cb_id': x, 'img': imgs[x % len(imgs)]} for x in range(country_balls_amount)]
 #                 print('Started')
-
-
 
 #                 dir = f"./{module_name.replace('.','/')}/"
 #                 if not os.path.exists(dir):

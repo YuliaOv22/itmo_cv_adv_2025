@@ -1,10 +1,11 @@
-import numpy as np
-import random
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
-import os
 import argparse
 import json
+import os
+import random
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import curve_fit
 
 
 def get_point_on_random_side(width, height):
@@ -44,7 +45,6 @@ def check_track(track, width, height):
 
 def add_track_to_tracks(track, tracks, id, cb_width, cb_height, random_range, bb_skip_percent):
     for i, p in enumerate(track):
-        # a chance that detector missed object
         if random.random() < bb_skip_percent:
             bounding_box = []
         else:
@@ -99,14 +99,13 @@ def generate_tracks(tracks_amount, random_range, bb_skip_percent, width=1000, he
 def save_tracks_to_file(tracks, tracks_amount, random_range, bb_skip_percent):
     dir_name = f"obj{tracks_amount}"
     os.makedirs(dir_name, exist_ok=True)
-    
+
     filename = f"{dir_name}/obj{tracks_amount}_{random_range}_{str(bb_skip_percent).replace('.','')}.py"
-    
+
     with open(filename, 'w') as f:
-        # json.dump({'country_balls_amount': tracks_amount, 'track_data': tracks}, f, indent=4)
         f.write(f"country_balls_amount = {tracks_amount}\n")
         f.write(f"track_data = {tracks}\n")
-    
+
     print(f"Data saved to {filename}")
 
 

@@ -14,6 +14,6 @@ for tracks_amount in tracks_amount_values:
                     '--random_range', str(random_range),
                     '--bb_skip_percent', str(bb_skip_percent)
                 ]
-                
+
                 print(f"Running with tracks_amount={tracks_amount}, random_range={random_range}, bb_skip_percent={bb_skip_percent}")
                 subprocess.run(command)
