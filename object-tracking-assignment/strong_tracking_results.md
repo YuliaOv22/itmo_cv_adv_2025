@@ -1,4 +1,4 @@
-| Объекты | random_range | bb_skip_percent | ID Precision | ID Switch Count | Mismatch Ratio |
+| Объекты | random_range | bb_skip_percent | Average Track Coverage | ID Switch Count | Mismatch Ratio |
 |:-------:|:------------:|:---------------:|:------------:|:---------------:|:--------------:|
 | 5 | 2 | 0.2 | 0.7202072538860104 | 74 | 0.45962732919254656 |
 | 5 | 2 | 0.4 | 0.6611111111111111 | 120 | 1.1009174311926606 |

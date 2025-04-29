@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-
 class TrackingMetrics:
     def __init__(self):
         self.reset()
@@ -44,44 +43,12 @@ class TrackingMetrics:
     def calculate_metrics(self):
         """Вычисляет все метрики трекинга"""
         metrics = {
-            'id_precision': self.calculate_id_precision(),
-            'id_recall': self.calculate_id_recall(),
+            'avg_track_coverage': self.calculate_avg_track_coverage(),
             'avg_track_duration': self.calculate_avg_track_duration(),
             'id_switch_count': self.calculate_id_switch_count(),
-            'fragmentation_count': self.calculate_fragmentation_count(),
             'mismatch_ratio': self.calculate_mismatch_ratio(),
-            'avg_track_coverage': self.calculate_avg_track_coverage()
         }
         return metrics
-
-    def calculate_id_precision(self):
-        """Точность соответствия track_id реальному cb_id"""
-        correct = 0
-        total = 0
-
-        for track_id, cb_ids in self.track_id_to_cb.items():
-            if not cb_ids:
-                continue
-
-            most_common_cb = max(set(cb_ids), key=cb_ids.count)
-            correct += cb_ids.count(most_common_cb)
-            total += len(cb_ids)
-
-        return correct / total if total > 0 else 0
-
-    def calculate_id_recall(self):
-        """Доля правильно отслеженных уникальных cb_id"""
-        correctly_tracked = 0
-
-        for cb_id, track_ids in self.cb_id_to_tracks.items():
-            if not track_ids:
-                continue
-
-            most_common_track = max(set(track_ids), key=track_ids.count)
-            if track_ids.count(most_common_track) / len(track_ids) > 0.5:
-                correctly_tracked += 1
-
-        return correctly_tracked / len(self.cb_id_to_tracks) if self.cb_id_to_tracks else 0
 
     def calculate_avg_track_duration(self):
         """Средняя продолжительность трека в кадрах"""
@@ -110,19 +77,6 @@ class TrackingMetrics:
         """Общее количество переключений ID"""
         return sum(self.id_switches.values())
 
-    def calculate_fragmentation_count(self):
-        """Количество разрывов треков (смена ID с возвратом к предыдущему)"""
-        fragmentation = 0
-
-        for cb_id, track_ids in self.cb_id_to_tracks.items():
-            if len(track_ids) < 2:
-                continue
-
-            for i in range(1, len(track_ids)-1):
-                if track_ids[i] != track_ids[i-1] and track_ids[i+1] == track_ids[i-1]:
-                    fragmentation += 1
-        return fragmentation
-
     def calculate_mismatch_ratio(self):
         """Коэффициент переключений ID = количество переключений / общее число детекций"""
         total_switches = sum(self.id_switches.values())
@@ -146,30 +100,13 @@ class TrackingMetrics:
 
         return sum(coverages) / len(coverages) if coverages else 0
 
-    def calculate_id_recall(self):
-        """Доля правильно отслеженных уникальных cb_id"""
-        correctly_tracked = 0
-
-        for cb_id, track_ids in self.cb_id_to_tracks.items():
-            if not track_ids:
-                continue
-
-            most_common_track = max(set(track_ids), key=track_ids.count)
-            if track_ids.count(most_common_track) / len(track_ids) > 0.5:
-                correctly_tracked += 1
-
-        return correctly_tracked / len(self.cb_id_to_tracks) if self.cb_id_to_tracks else 0
-
     def report(self):
         """Выводит отчет по метрикам"""
         metrics = self.calculate_metrics()
         print("\nTracking Metrics Report:")
         print("=" * 40)
-        print(f"ID Precision: {metrics['id_precision']:.3f}")
-        print(f"ID Recall: {metrics['id_recall']:.3f}")
+        print(f"Avg Track Coverage: {metrics['avg_track_coverage']:.3f}")
         print(f"Avg Track Duration: {metrics['avg_track_duration']:.1f} frames")
         print(f"ID Switch Count: {metrics['id_switch_count']}")
-        print(f"Fragmentation Count: {metrics['fragmentation_count']}")
         print(f"Mismatch Ratio: {metrics['mismatch_ratio']:.4f}")
-        print(f"Avg Track Coverage: {metrics['avg_track_coverage']:.3f}")
         print("=" * 40)

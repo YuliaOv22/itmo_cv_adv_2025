@@ -252,10 +252,12 @@ def tracker_strong(tracker, el, dir_frames):
             current_ids.add(best_id)
         else:
             # Новый track_id
-            if tracker.used_ids_history:
-                new_id = max([int(x) for x in tracker.used_ids_history]) + 1
-            else:
-                new_id = 0
+            # if tracker.used_ids_history:
+            #     new_id = max([int(x) for x in tracker.used_ids_history]) + 1
+            # else:
+            #     new_id = 0
+            new_id = tracker.next_id
+            tracker.next_id += 1
             x['track_id'] = new_id
             tracker.extra_tracks[new_id] = {'ttl': INITIAL_TTL - 1}
             tracker.used_ids_history.add(new_id)
@@ -273,14 +275,14 @@ def tracker_strong(tracker, el, dir_frames):
 
 def save_results_to_md(results: list, file_path: str) -> None:
     file_exists = os.path.exists(file_path)
-    
+
     with open(file_path, 'a' if file_exists else 'w') as file:
         if not file_exists:
-            file.write("| Объекты | random_range | bb_skip_percent | ID Precision | ID Switch Count | Mismatch Ratio |\n")
+            file.write("| Объекты | random_range | bb_skip_percent |  Average Track Coverage | ID Switch Count | Mismatch Ratio |\n")
             file.write("|:-------:|:------------:|:---------------:|:------------:|:---------------:|:--------------:|\n")
-        
+
         for result in results:
-            file.write(f"| {result['objects']} | {result['random_range']} | {result['bb_skip_percent']} | {result['ID Precision']} | {result['ID Switch Count']} | {result['Mismatch Ratio']} |\n")
+            file.write(f"| {result['objects']} | {result['random_range']} | {result['bb_skip_percent']} | {result['Average Track Coverage']} | {result['ID Switch Count']} | {result['Mismatch Ratio']} |\n")
 
 
 @app.websocket("/ws")
@@ -288,16 +290,16 @@ async def websocket_endpoint(websocket: WebSocket):
     print('Accepting client connection...')
     await websocket.accept()
 
-    # tracks_amount = 5
+    tracks_amount = 5
     # tracks_amount = 10
-    tracks_amount = 20
+    # tracks_amount = 20
 
 
-    # random_range = 2
-    random_range = 5
+    random_range = 2
+    # random_range = 5
 
-    # bb_skip_percent = 0.2
-    bb_skip_percent = 0.4
+    bb_skip_percent = 0.2
+    # bb_skip_percent = 0.4
 
 
     module_name = f'obj{tracks_amount}.obj{tracks_amount}_{random_range}_{str(bb_skip_percent).replace(".","")}'
@@ -320,9 +322,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
     for el in track_data:
         await asyncio.sleep(1)
-        el = tracker_soft(el)
+        # el = tracker_soft(el)
 
-        # el = tracker_strong(tracker, el, dir)
+        el = tracker_strong(tracker, el, dir)
+        # print(len(el['data']), el['data'])
         await websocket.send_json(el)
 
         metrics.add_frame(el)
@@ -332,7 +335,7 @@ async def websocket_endpoint(websocket: WebSocket):
         'objects': tracks_amount,
         'random_range': random_range,
         'bb_skip_percent': bb_skip_percent,
-        'ID Precision': metrics_dict['id_precision'],
+        'Average Track Coverage': metrics_dict['avg_track_coverage'],
         'ID Switch Count': metrics_dict['id_switch_count'],
         'Mismatch Ratio': metrics_dict['mismatch_ratio']
     }
@@ -340,7 +343,7 @@ async def websocket_endpoint(websocket: WebSocket):
     results = [result]
 
     # save_results_to_md(results, 'strong_tracking_results.md')
-    save_results_to_md(results, 'soft_tracking_results.md')
+    # save_results_to_md(results, 'soft_tracking_results_new.md')
 
 
     print(f'Metrics for {tracks_amount} tracks, random_range = {random_range}, bb_skip_percent = {bb_skip_percent}')
@@ -349,7 +352,6 @@ async def websocket_endpoint(websocket: WebSocket):
     await asyncio.sleep(0.5)
     print('Bye..')
     await websocket.close()
-
 
 # @app.websocket("/ws")
 # async def websocket_endpoint(websocket: WebSocket):
