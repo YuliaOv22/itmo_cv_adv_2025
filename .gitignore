@@ -1,3 +1,8 @@
+# Data
+data/
+public_data/
+sample_submission.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
