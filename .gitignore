@@ -2,6 +2,8 @@
 data/
 public_data/
 sample_submission.csv
+tries_kaggles/
+output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -61,7 +63,7 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
+# *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
