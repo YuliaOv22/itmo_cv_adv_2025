@@ -240,6 +240,9 @@ class MainWindow(QMainWindow):
         self.display_frame(frame)
         
     def display_frame(self, frame):
+        # Зеркалим кадр по горизонтали
+        frame = cv2.flip(frame, 1)
+        
         # Конвертируем кадр в формат для отображения
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = rgb_frame.shape
@@ -252,18 +255,22 @@ class MainWindow(QMainWindow):
         pen = QPen(Qt.red, 3)
         painter.setPen(pen)
         
-        # Рисуем линию
+        # Рисуем линию с отраженными координатами
         if len(self.points) > 1:
             for i in range(len(self.points) - 1):
-                painter.drawLine(
-                    int(self.points[i][0]), int(self.points[i][1]),
-                    int(self.points[i+1][0]), int(self.points[i+1][1])
-                )
+                # Отражаем x-координаты относительно ширины изображения
+                x1 = w - int(self.points[i][0])
+                y1 = int(self.points[i][1])
+                x2 = w - int(self.points[i+1][0])
+                y2 = int(self.points[i+1][1])
+                painter.drawLine(x1, y1, x2, y2)
         
-        # Рисуем круг на последней позиции пальца
+        # Рисуем круг на последней позиции пальца с отраженными координатами
         if self.points:
             last_point = self.points[-1]
-            painter.drawEllipse(int(last_point[0]) - 10, int(last_point[1]) - 10, 20, 20)
+            x = w - int(last_point[0])
+            y = int(last_point[1])
+            painter.drawEllipse(x - 10, y - 10, 20, 20)
         
         painter.end()
         
