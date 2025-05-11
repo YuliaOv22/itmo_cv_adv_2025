@@ -36,3 +36,5 @@
   
 Keypoints в датасете представлены в формате [21, 3] - 21 ключевая точка, каждая состоит из координат x,y и значения visible.
 
+[Графики и метрики обучения модели YOLO11n-pose](https://github.com/YuliaOv22/itmo_cv_adv_2025/blob/lab_6/logs_yolo11n.md)  
+[Графики и метрики обучения модели YOLO11x-pose](https://github.com/YuliaOv22/itmo_cv_adv_2025/blob/lab_6/logs_yolo11x.md)
