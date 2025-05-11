@@ -32,7 +32,7 @@
 
 ### 1.2. Обучение модели
 
-В ходе работы для данной задачи были обучены 2 модели YOLO: **yolo11n-pose** и **yolo11x-pose**. Файл конфигурации data.yaml [тут](). Файл обучения модели [тут]().
+В ходе работы для данной задачи были обучены 2 модели YOLO: **yolo11n-pose** и **yolo11x-pose**. Файл конфигурации data.yaml [тут](https://github.com/YuliaOv22/itmo_cv_adv_2025/blob/lab_6/training_scripts/data.yaml). Файл обучения модели [тут](https://github.com/YuliaOv22/itmo_cv_adv_2025/blob/lab_6/training_scripts/train_yolo.py).
   
 Keypoints в датасете представлены в формате [21, 3] - 21 ключевая точка, каждая состоит из координат x,y и значения visible.
 
@@ -46,7 +46,7 @@ Keypoints в датасете представлены в формате [21, 3]
 
 *P.S. Также хотелось сравнить результаты с моделью из репозитория [Hand Keypoint Detection using Deep Learning and OpenCV](https://github.com/erezposner/MV_HandKeyPointDetector), но ссылка на веса данной модели оказалась не рабочей и найти ее не удалось*  
 
-Сравнение моделей производилось на исходном датасете для валидации. Результаты, полученные от всех моделей были преобразованы в формат COCO, а затем оценены с помощью pycocotools COCOeval. [Jupyter Notebook с кодом inference моделей на валидационном датасете и оценкой метрик каждой из моделей]()
+Сравнение моделей производилось на исходном датасете для валидации. Результаты, полученные от всех моделей были преобразованы в формат COCO, а затем оценены с помощью pycocotools COCOeval. [Jupyter Notebook с кодом inference моделей на валидационном датасете и оценкой метрик каждой из моделей](https://github.com/YuliaOv22/itmo_cv_adv_2025/blob/lab_6/jupyter_notebooks/evaluating_models.ipynb)
 
 **Таблица сравнения моделей**
 | Модель             | mAP@[.50:.95] | mAP@.50 |
