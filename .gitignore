@@ -3,7 +3,6 @@ data/
 public_data/
 sample_submission.csv
 tries_kaggles/
-output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

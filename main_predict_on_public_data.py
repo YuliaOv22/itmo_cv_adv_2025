@@ -1,13 +1,13 @@
 from pathlib import Path
 from metrics.compare_images_metrics import compute_metrics
 from utils.read_save_files import read_images_from_directory, save_paths_to_file
-import scripts.hash_methods as hm
-import scripts.ssim_method as ssm
-import scripts.histogram_method as hgm
-import scripts.orb_method as om
-import scripts.sift_method as sm
-from scripts.cnn import TransformerEmbedder
-from scripts.log import TeeLoggerContext
+import scripts.detect_with_hash_methods as hm
+import scripts.detect_with_ssim_method as ssm
+import scripts.detect_with_histogram_method as hgm
+import scripts.detect_with_orb_method as om
+import scripts.detect_with_sift_method as sm
+from scripts.detect_with_cnn import TransformerEmbedder
+from utils.log import TeeLoggerContext
 
 
 if __name__ == "__main__":
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         )
 
         # Метод pHash (Perceptual Hash)
-        print("-------------------Метод pHash (Perceptual Hash)-------------------")
+        print("-------------------1. Метод pHash (Perceptual Hash)-------------------")
         output_path = Path(f"{output_dir_path}/pred_cached_pHash.txt")
         preds = hm.get_image_comparison(
             train_images, test_images, threshold=15, comparison_method="phash"
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         # phash_preds = preds
 
         # Метод dHash (Difference Hash)
-        print("-------------------Метод dHash (Difference Hash)-------------------")
+        print("-------------------2. Метод dHash (Difference Hash)-------------------")
         output_path = Path(f"{output_dir_path}/pred_cached_dHash.txt")
         preds = hm.get_image_comparison(
             train_images, test_images, threshold=15, comparison_method="dhash"
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         # dhash_preds = preds
 
         # Метод Fast dHash
-        print("-------------------Метод Fast dHash-------------------")
+        print("-------------------3. Метод Fast dHash-------------------")
         output_path = Path(f"{output_dir_path}/pred_cached_fast_dHash.txt")
         preds = hm.get_image_comparison(
             train_images, test_images, threshold=15, comparison_method="fast_dhash"
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         fast_dhash_preds = preds
 
         # Метод SSIM
-        print("-------------------Метод SSIM-------------------")
+        print("-------------------4. Метод SSIM-------------------")
         output_path = Path(f"{output_dir_path}/pred_ssim.txt")
 
         # Размер изображений
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         # ssim_preds = preds
 
         # Метод Histogram
-        print("-------------------Метод Histogram-------------------")
+        print("-------------------5. Метод Histogram-------------------")
         output_path = Path(f"{output_dir_path}/pred_histogram.txt")
 
         # Параметры гистограммы
@@ -121,10 +121,10 @@ if __name__ == "__main__":
         hist_preds = preds
 
         # Метод ORB (Oriented FAST and Rotated BRIEF)
-        print("-------------------Метод ORB-------------------")
+        print("-------------------6. Метод ORB-------------------")
         output_path = Path(f"{output_dir_path}/pred_orb.txt")
 
-        # # Параметры
+        # Параметры
         IMAGE_SIZE = (128, 128)
 
         # Предзагрузка изображений
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         orb_preds = preds
 
         # Метод SIFT (Scale-Invariant Feature Transform)
-        print("-------------------Метод SIFT-------------------")
+        print("-------------------7. Метод SIFT-------------------")
         output_path = Path(f"{output_dir_path}/pred_sift.txt")
 
         # Предзагрузка дескрипторов SIFT
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         # sift_preds = preds
 
         # ResNet50
-        print("------------------ResNet50-------------------")
+        print("------------------8. ResNet50-------------------")
         output_path = Path(f"{output_dir_path}/pred_resnet50.txt")
         IMAGE_SIZE = (224, 224)
         embedder = TransformerEmbedder(IMAGE_SIZE, model_name="resnet50", device="cuda")
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         resnet_preds = preds
 
         # EfficientNet-B4
-        print("------------------EfficientNet-B4-------------------")
+        print("------------------9. EfficientNet-B4-------------------")
         output_path = Path(f"{output_dir_path}/pred_efficientnet_b4.txt")
         IMAGE_SIZE = (380, 380)
         embedder = TransformerEmbedder(
@@ -218,7 +218,7 @@ if __name__ == "__main__":
         # efficientnet_preds = preds
 
         # ConvNeXt-Tiny
-        print("------------------ConvNeXt-Tiny-------------------")
+        print("------------------10. ConvNeXt-Tiny-------------------")
         output_path = Path(f"{output_dir_path}/pred_convnext_tiny.txt")
         IMAGE_SIZE = (224, 224)
         embedder = TransformerEmbedder(
@@ -244,29 +244,29 @@ if __name__ == "__main__":
         # convnext_preds = preds
 
         # Комбинации методов
-        print("-------------------Комбинации методов-------------------")
-        print("-------------------Методы FAST_DHASH + HIST + ORB-------------------")
+        print("-------------------11. Комбинации методов-------------------")
+        print("-------------------FAST_DHASH + HIST + ORB-------------------")
         combined_preds = fast_dhash_preds + hist_preds + orb_preds
         metrics_combined = compute_metrics(leakage_images, combined_preds, test_images)
 
-        print("-------------------Методы HIST + ORB-------------------")
+        print("-------------------HIST + ORB-------------------")
         combined_preds = hist_preds + orb_preds
         metrics_combined = compute_metrics(leakage_images, combined_preds, test_images)
 
-        print("-------------------Методы FAST_DHASH + ORB-------------------")
+        print("-------------------FAST_DHASH + ORB-------------------")
         combined_preds = fast_dhash_preds + orb_preds
         metrics_combined = compute_metrics(leakage_images, combined_preds, test_images)
 
-        print("-------------------Методы ORB + ResNet-------------------")
+        print("-------------------ORB + ResNet-------------------")
         combined_preds = orb_preds + resnet_preds
         metrics_combined = compute_metrics(leakage_images, combined_preds, test_images)
 
-        print("-------------------Методы HIST + ORB + ResNet-------------------")
+        print("-------------------HIST + ORB + ResNet-------------------")
         combined_preds = hist_preds + orb_preds + resnet_preds
         metrics_combined = compute_metrics(leakage_images, combined_preds, test_images)
 
         
-        print("-------------------Методы ORB --> ResNet-------------------")
+        print("-------------------12. Методы ORB --> ResNet-------------------")
         left_images = [img for img in test_images if img not in orb_preds]
         # ResNet50
         print("------------------ResNet50-------------------")

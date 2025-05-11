@@ -1,9 +1,9 @@
 from pathlib import Path
 from utils.read_save_files import read_images_from_directory, save_paths_to_file
-import scripts.orb_method as om
-from scripts.cnn import TransformerEmbedder
+import scripts.detect_with_orb_method as om
+from scripts.detect_with_cnn import TransformerEmbedder
 import time
-from scripts.log import TeeLoggerContext
+from utils.log import TeeLoggerContext
 
 if __name__ == "__main__":
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         private_data_dir = Path("data")
         train_images_path_private = f"{private_data_dir}/train"
         test_images_path_private = f"{private_data_dir}/test"
-        output_dir_path = "output"
+        output_dir_path = Path("output")
         image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff"}
         is_resnet = True
 
@@ -27,14 +27,10 @@ if __name__ == "__main__":
             train_images_path_private, test_images_path_private, image_extensions
         )
 
-        output_path_orb_csv = Path(
-            f"{output_dir_path}/pred_orb_submission.csv"
-        )
-        output_path_orb_resnet_csv = Path(
-            f"{output_dir_path}/pred_orb_resnet_submission.csv"
-        )
-        output_path_orb_txt = Path(f"{output_dir_path}/pred_orb_final.txt")
-        output_path_orb_resnet_txt = Path(f"{output_dir_path}/pred_orb_resnet_final.txt")
+        output_path_orb_csv = output_dir_path / "pred_orb_submission.csv"
+        output_path_orb_resnet_csv = output_dir_path / "pred_orb_resnet_submission.csv"
+        output_path_orb_txt = output_dir_path / "pred_orb_final.txt"
+        output_path_orb_resnet_txt = output_dir_path /"pred_orb_resnet_final.txt"
 
         # Метод ORB (Oriented FAST and Rotated BRIEF)
         print("-------------------Метод ORB-------------------")

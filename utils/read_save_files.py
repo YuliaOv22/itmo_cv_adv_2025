@@ -1,6 +1,10 @@
 from pathlib import Path
 from typing import List
 import csv
+from metrics.clustering_metrics import (
+    exact_match,
+    partial_match,
+)
 
 
 def read_images_from_directory(
@@ -68,3 +72,17 @@ def save_paths_to_file(file_path: Path, pred_paths: List[Path] | List[List], for
             print(f"Ответы успешно сохранены в файл: {file_path}")
 
     
+def print_save_results_clustering(
+    true_groups: list[list[str]],
+    preds_groups: list[list[str]],
+    output_dir_path: Path,
+    output_file_name: str,
+) -> None:
+    """Выводит результаты кластеризации и сохраняет предсказанные группы в файл."""
+
+    if true_groups:
+        print(f"Точное совпадение групп: {exact_match(true_groups, preds_groups)}")
+        print(f"Частичное совпадение групп: {partial_match(true_groups, preds_groups)}")
+    with open(output_dir_path / output_file_name, "w") as f:
+        for group in preds_groups:
+            f.write(f"{','.join(group)}\n")

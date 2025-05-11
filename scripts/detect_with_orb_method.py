@@ -14,7 +14,7 @@ def load_images(
 
     images = []
 
-    for path in images_paths:
+    for path in tqdm(images_paths, desc="Загрузка изображений"):
         img = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
         if img is not None:
             img_resized = cv2.resize(img, target_size)
