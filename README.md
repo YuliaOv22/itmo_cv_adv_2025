@@ -1,21 +1,38 @@
-### Topic 1. Classic Computer Vision
-Поиск дублирующихся изображений ([Домашнее задание 1](https://github.com/aitalents/computer-vision-technology/blob/main/Topic%201.%20Classic%20Computer%20Vision/Homework.md))
-  --> Brach lab_1
+# Домашнее задание №6. Виртуальная доска
+# Отчет о проделанной работе
+###### Команда #1 (Никитина Алина, Овчинникова Юлия, Горохова Александра)  
+  
+## 1. Обучение модели определения ключевых точек руки
 
-### Topic 3. Metric Learning
-Metric Learning ([Домашнее задание 2](https://github.com/aitalents/computer-vision-technology/tree/main/Topic%203.%20Metric%20Learning/homework))
-  --> Brach lab_2
+### 1.1. Датасет
 
-### Topic 4. Object detection, semantic segmentation and object tracking
-Object detection ([Домашнее задание 3](https://github.com/aitalents/computer-vision-technology/tree/main/Topic%204.%20Object%20detection%2C%20semantic%20segmentation%20and%20object%20tracking))
-  --> Brach lab_3
+Для обучения модели определения ключевых точек руки был выбран датасет [Hand Keypoint Dataset 26K](https://www.kaggle.com/datasets/riondsilva21/hand-keypoint-dataset-26k)
 
-Object tracking ([Домашнее задание 4](https://github.com/aitalents/computer-vision-technology/tree/main/Topic%204.%20Object%20detection%2C%20semantic%20segmentation%20and%20object%20tracking))
-  --> Brach lab_4
+Датасет состоит из следующих частей:
 
-### Topic 5. 3D Computer Vision
-Разработка простейшей системы помощи водителю ([Домашнее задание 5](https://github.com/thegoldenbeetle/3d-cv-assignment))
-  --> Brach lab_5
+**images**: Изображения, разделенные на train и val.  
+**annotations**: Аннотации для изображений в формате COCO.  
+**labels**: Аннотации для изображений в формате YOLO.  
 
-### Topic 7. Pose Estimation
-Виртуальная доска ([Домашнее задание 6](https://github.com/aitalents/computer-vision-technology/blob/main/Topic%207.%20Pose%20Estimation/Homework.md)) --> Brach lab_6
+Каждая аннотация содержит в себе:
+- координаты bounding box для рук на изображении
+- координаты keypoints для руки
+
+Ключевые точки аннотируются следующим образом:
+- Запястье
+- Большой палец (4 точки)
+- Указательный палец (4 точки)
+- Средний палец (4 точки)
+- Безымянный палец (4 точки)
+- Мизинец (4 точки)
+  
+Каждая рука имеет в общей сложности 21 ключевую точку.
+
+![image](https://github.com/user-attachments/assets/bdea2d1f-b538-4a75-9e03-11f389b490e5)
+
+### 1.2. Обучение модели
+
+В ходе работы для данной задачи были обучены 2 модели YOLO: **yolo11n-pose** и **yolo11x-pose**. Файл конфигурации data.yaml [тут](). Файл обучения модели [тут]().
+  
+Keypoints в датасете представлены в формате [21, 3] - 21 ключевая точка, каждая состоит из координат x,y и значения visible.
+
