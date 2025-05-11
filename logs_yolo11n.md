@@ -1,5 +1,8 @@
 ## Графики и метрики обучения yolo11n-pose в задаче определения ключевых точек руки
 
+#### Итоговые метрики на валидации
+<img width="843" alt="image" src="https://github.com/user-attachments/assets/f86a075a-f686-4b15-9cf9-a285c52b8cfb" />
+
 #### Графики обучения
 <table style="width: 100%; text-align: center;">
   <tr>
@@ -20,13 +23,48 @@
   </tr>
 </table>
 
+![image](https://github.com/user-attachments/assets/3225ac5b-20d2-49db-9bd9-a65b4adfcc1c)
+
+#### Pose метрики
+<table style="width: 100%; text-align: center;">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/a4fb0692-ffb1-4e9f-98b3-16bca81d2ed1" alt="Image 1" style="max-width: 100%; height: auto;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/c691ed0b-f571-4e36-a045-055fefc8c194" alt="Image 2" style="max-width: 100%; height: auto;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/436bd50e-cf1e-4268-a8d0-648183dac7e5" alt="Image 3" style="max-width: 100%; height: auto;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/fb44cdd6-6a15-432a-8eab-d6517807f041" alt="Image 4" style="max-width: 100%; height: auto;">
+    </td>
+  </tr>
+</table>
+
+#### Box метрики
+<table style="width: 100%; text-align: center;">
+  <tr>
+    <td>
+      <img src="https://github.com/user-attachments/assets/689bbef3-76f7-4c4e-afb8-a8d7efeb91f4" alt="Image 1" style="max-width: 100%; height: auto;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/2e91918c-bc11-403e-8766-1959bd18bd6c" alt="Image 2" style="max-width: 100%; height: auto;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/c73e9046-d184-4566-81d9-e962b86c5d6f" alt="Image 3" style="max-width: 100%; height: auto;">
+    </td>
+    <td>
+      <img src="https://github.com/user-attachments/assets/aab43a6a-0c1d-453d-9b04-215125532026" alt="Image 4" style="max-width: 100%; height: auto;">
+    </td>
+  </tr>
+</table>
+
 #### Confusion matrix
 <img width="511" alt="image" src="https://github.com/user-attachments/assets/0b5202c5-adea-4097-9355-236bb0b588df" />
 
-#### Итоговые метрики на валидации
-<img width="843" alt="image" src="https://github.com/user-attachments/assets/f86a075a-f686-4b15-9cf9-a285c52b8cfb" />
-
-### Примеры предсказаний на датасете для валидации
+#### Примеры предсказаний на датасете для валидации
 
 ![image](https://github.com/user-attachments/assets/1fd63dbd-0bd4-468a-a2e9-c08312ad8ad4)
 ![image](https://github.com/user-attachments/assets/07d5b997-ba3c-4bd6-98b3-693bd438b40d)
