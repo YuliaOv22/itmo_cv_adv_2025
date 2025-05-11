@@ -1,4 +1,5 @@
-## Команда #1 (Никитина Алина, Овчинникова Юлия, Горохова Александра)  
+## Команда #1  
+#### Никитина Алина, Овчинникова Юлия, Горохова Александра
 
 ### Topic 1. Classic Computer Vision
 Поиск дублирующихся изображений ([Домашнее задание 1](https://github.com/aitalents/computer-vision-technology/blob/main/Topic%201.%20Classic%20Computer%20Vision/Homework.md))
