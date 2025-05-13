@@ -1,8 +1,9 @@
-import os
-import cv2
-import tempfile
 import argparse
+import os
+import tempfile
 
+import cv2
+from nuscenes.nuscenes import NuScenes
 from rich.console import Console
 
 from distances_utils import *

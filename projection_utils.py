@@ -3,16 +3,6 @@ from pyquaternion import Quaternion
 
 
 def create_bbox_mask(image_shape, bboxes):
-    """
-    Создаёт бинарную маску для всех bounding box'ов.
-
-    Параметры:
-    - image_shape: форма изображения (H, W)
-    - bboxes: список bounding box'ов [x1, y1, x2, y2]
-
-    Возвращает:
-    - mask: бинарная маска изображения, где 1 — внутри bbox, 0 — вне
-    """
     mask = np.zeros(image_shape, dtype=np.uint8)
     for x1, y1, x2, y2 in bboxes:
         x1, y1 = int(round(x1)), int(round(y1))
@@ -22,17 +12,6 @@ def create_bbox_mask(image_shape, bboxes):
 
 
 def filter_points_by_mask(uv, points_3d, mask):
-    """
-    Фильтрует 3D-точки, оставляя только те, чьи 2D-координаты попадают в маску.
-
-    Параметры:
-    - uv: 2D-координаты точек (N, 2)
-    - points_3d: 3D-координаты точек (N, 3)
-    - mask: бинарная маска изображения
-
-    Возвращает:
-    - filtered_points_3d: отфильтрованные 3D-точки
-    """
     H, W = mask.shape
     uv_int = np.round(uv).astype(int)
 
@@ -48,18 +27,6 @@ def filter_points_by_mask(uv, points_3d, mask):
 
 
 def get_calibration(nusc, cam_data, lidar_data):
-    """
-    Получает калибровочные параметры камеры и лидара.
-
-    Параметры:
-    - nusc: объект NuScenes
-    - cam_data: метаданные камеры
-    - lidar_data: метаданные лидара
-
-    Возвращает:
-    - cam_intrinsic: матрица интринсиков камеры 3x3
-    - lidar2cam: матрица преобразования 4x4 из лидара в координаты камеры
-    """
     cam_sensor = nusc.get('calibrated_sensor', cam_data['calibrated_sensor_token'])
     lidar_sensor = nusc.get('calibrated_sensor', lidar_data['calibrated_sensor_token'])
 
@@ -82,18 +49,6 @@ def get_calibration(nusc, cam_data, lidar_data):
 
 
 def project_lidar2image(pc, lidar2cam, cam_intrinsic):
-    """
-    Проецирует 3D-точки из облака лидара на 2D-изображение.
-
-    Параметры:
-    - pc: облако точек лидара (объект LidarPointCloud)
-    - lidar2cam: матрица 4x4 преобразования из лидара в камеру
-    - cam_intrinsic: матрица интринсиков камеры 3x3
-
-    Возвращает:
-    - uv: 2D-координаты точек на изображении (N, 2)
-    - pts_cam: 3D-координаты точек в системе камеры (N, 3)
-    """
     points_lidar = pc.points[:3, :]
     points_lidar_h = np.vstack((points_lidar, np.ones(points_lidar.shape[1])))
 
