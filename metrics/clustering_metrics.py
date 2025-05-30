@@ -6,12 +6,13 @@ def exact_match(true_groups: list, pred_clusters: list) -> float:
     pred_sets = [set(cluster) for cluster in pred_clusters]
 
     # Считаем, сколько предсказанных кластеров есть в истинных группах
+    print(f"Совпавшие группы: ")
     correct = 0
     for p in pred_sets:
         if p in true_sets:
             correct += 1
-
-    return correct / len(pred_sets)
+            print(p)
+    return correct / len(true_sets)
 
 
 def partial_match(true_groups: list, pred_clusters: list, threshold: float = 0.8):
@@ -27,4 +28,4 @@ def partial_match(true_groups: list, pred_clusters: list, threshold: float = 0.8
         if max_overlap >= threshold:
             correct += 1
 
-    return correct / len(pred_clusters)
+    return correct / len(true_sets)

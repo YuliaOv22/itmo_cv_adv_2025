@@ -17,6 +17,27 @@ from scripts.clustering_orb_resnet_kmeans_agg import (
     extract_orb_features,
     create_combined_embeddings,
 )
+from utils.measure_time import measure_time
+
+
+def get_all_image_paths_and_open_groups(
+    train_images_path, image_extensions, true_groups_path
+):
+    """Получает все пути к изображениям и открывает файл с группами изображений."""
+
+    all_image_paths = [
+        p for p in train_images_path.glob("*") if p.suffix.lower() in image_extensions
+    ]
+
+    # Чтение файла с группами изображений
+    with open(true_groups_path, "r") as f:
+        lines = f.readlines()
+
+    true_groups = [line.strip().split(",") for line in lines]
+    print(f"Количество групп: {len(true_groups)}")
+    # print(f"Пример группы: {true_groups[0]}")
+
+    return all_image_paths, true_groups
 
 
 if __name__ == "__main__":
@@ -25,8 +46,6 @@ if __name__ == "__main__":
     log_path.parent.mkdir(exist_ok=True)
 
     with TeeLoggerContext(log_path):
-
-        start_time = time.time()
 
         print("-------------------Public data-------------------")
         # Настройка переменных
@@ -38,32 +57,23 @@ if __name__ == "__main__":
         image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff"}
         true_groups_path = input_dir_path / "groups.txt"
 
+        print(
+            "\n-------------------1. Метод ORB + Graph-based clustering-------------------"
+        )
+        start_time = time.time()
+
         # Чтение изображений из папок
         train_images, test_images = read_images_from_directory(
             train_images_path, test_images_path, image_extensions
         )
-        all_image_paths = [
-            p
-            for p in train_images_path.glob("*")
-            if p.suffix.lower() in image_extensions
-        ]
 
-        # Чтение файла с группами изображений
-        with open(true_groups_path, "r") as f:
-            lines = f.readlines()
-
-        true_groups = [line.strip().split(",") for line in lines]
-        print(f"Количество групп: {len(true_groups)}")
-        print(f"Пример группы: {true_groups[0]}")
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
 
         IMAGE_SIZE = (128, 128)
         N_VISUAL_WORDS = 50
         N_CLUSTERS = len(true_groups)  # Количество истинных групп для сравнения
-
-        print(
-            "\n-------------------1. Метод ORB + Graph-based clustering-------------------"
-        )
-        output_path = Path(f"{output_dir_path}/clustering_orb.txt")
 
         # Предзагрузка изображений
         print("Загрузка тренировочных изображений...")
@@ -81,8 +91,7 @@ if __name__ == "__main__":
             "clustering_orb_graph.txt",
         )
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        orb_graph_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------Блок кластеризации с признаком ORB-------------------"
@@ -91,6 +100,11 @@ if __name__ == "__main__":
             "\n-------------------2. Кластеризация с помощью K-Means и ORB (BoVW)-------------------"
         )
         start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
+
         preds = ci_bovw(
             all_image_paths,
             n_clusters=N_CLUSTERS,
@@ -104,13 +118,17 @@ if __name__ == "__main__":
             "clustering_orb_bovw_kmeans_on_public_data.txt",
         )
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        kmeans_orb_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------3. Кластеризация с помощью Agglomerative Clustering и ORB (BoVW)-------------------"
         )
         start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
+
         preds = ci_bovw(
             all_image_paths,
             n_clusters=N_CLUSTERS,
@@ -126,13 +144,17 @@ if __name__ == "__main__":
             "clustering_orb_bovw_agg_on_public_data.txt",
         )
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        agg_orb_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------4. Кластеризация с помощью Agglomerative Clustering (average linkage) и ORB (BoVW)-------------------"
         )
         start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
+
         preds = ci_bovw(
             all_image_paths,
             n_clusters=N_CLUSTERS,
@@ -148,8 +170,7 @@ if __name__ == "__main__":
         )
 
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        agg_orb_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------Блок кластеризации с эмбеддингами ResNet-------------------"
@@ -161,6 +182,15 @@ if __name__ == "__main__":
         # Проверка доступности CUDA
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Используется устройство: {device}")
+
+        print(
+            "\n-------------------5. Кластеризация с помощью K-Means и ResNet-------------------"
+        )
+        start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
 
         # Загрузка предобученной модели ResNet-50
         resnet_model = models.resnet50(
@@ -178,13 +208,7 @@ if __name__ == "__main__":
             all_image_paths, feature_extractor, IMAGE_SIZE, device
         )
 
-        print(
-            "\n-------------------5. Кластеризация с помощью K-Means и ResNet-------------------"
-        )
-
-        preds = ci_resnet(
-            resnet_features, n_clusters=N_CLUSTERS, clust_method="kmeans"
-        )
+        preds = ci_resnet(resnet_features, n_clusters=N_CLUSTERS, clust_method="kmeans")
 
         print_save_results_clustering(
             true_groups,
@@ -194,13 +218,32 @@ if __name__ == "__main__":
         )
 
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        kmeans_resnet_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------6. Кластеризация с помощью K-Means и ORB + ResNet-------------------"
         )
         start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
+
+        # Загрузка предобученной модели ResNet-50
+        resnet_model = models.resnet50(
+            weights="ResNet50_Weights.IMAGENET1K_V1"
+        )  # Лучшие веса для задачи
+        resnet_model.fc = torch.nn.Identity()
+
+        # Добавление слоя адаптивного усредненного пулинга
+        feature_extractor = torch.nn.Sequential(
+            *list(resnet_model.children())[:-1], torch.nn.AdaptiveAvgPool2d(1)
+        ).to(device)
+
+        # Извлечение признаков ResNet
+        resnet_features = extract_resnet_features_torch(
+            all_image_paths, feature_extractor, IMAGE_SIZE, device
+        )
 
         # Извлечение признаков ORB
         orb_features = extract_orb_features(all_image_paths, ORB_FEATURE_SIZE)
@@ -225,13 +268,32 @@ if __name__ == "__main__":
         )
 
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        kmeans_orb_resnet_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------7. Кластеризация с помощью Agglomerative Clustering и ResNet-------------------"
         )
         start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
+
+        # Загрузка предобученной модели ResNet-50
+        resnet_model = models.resnet50(
+            weights="ResNet50_Weights.IMAGENET1K_V1"
+        )  # Лучшие веса для задачи
+        resnet_model.fc = torch.nn.Identity()
+
+        # Добавление слоя адаптивного усредненного пулинга
+        feature_extractor = torch.nn.Sequential(
+            *list(resnet_model.children())[:-1], torch.nn.AdaptiveAvgPool2d(1)
+        ).to(device)
+
+        # Извлечение признаков ResNet
+        resnet_features = extract_resnet_features_torch(
+            all_image_paths, feature_extractor, IMAGE_SIZE, device
+        )
 
         preds = ci_resnet(
             resnet_features, n_clusters=N_CLUSTERS, clust_method="agg", linkage="ward"
@@ -245,13 +307,32 @@ if __name__ == "__main__":
         )
 
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        agg_resnet_preds_time = measure_time(start_time, end_time)
 
         print(
             "\n-------------------8. Кластеризация с помощью Agglomerative Clustering (average linkage) и ResNet-------------------"
         )
         start_time = time.time()
+
+        all_image_paths, true_groups = get_all_image_paths_and_open_groups(
+            train_images_path, image_extensions, true_groups_path
+        )
+
+        # Загрузка предобученной модели ResNet-50
+        resnet_model = models.resnet50(
+            weights="ResNet50_Weights.IMAGENET1K_V1"
+        )  # Лучшие веса для задачи
+        resnet_model.fc = torch.nn.Identity()
+
+        # Добавление слоя адаптивного усредненного пулинга
+        feature_extractor = torch.nn.Sequential(
+            *list(resnet_model.children())[:-1], torch.nn.AdaptiveAvgPool2d(1)
+        ).to(device)
+
+        # Извлечение признаков ResNet
+        resnet_features = extract_resnet_features_torch(
+            all_image_paths, feature_extractor, IMAGE_SIZE, device
+        )
 
         preds = ci_resnet(
             resnet_features,
@@ -268,5 +349,4 @@ if __name__ == "__main__":
         )
 
         end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
+        agg_avg_resnet_preds_time = measure_time(start_time, end_time)

@@ -38,7 +38,6 @@ def get_image_comparison(
 ) -> List[Path]:
     """Сравнивает изображения из папок train и test с использованием метода SSIM."""
 
-    start_time = time.time()
     unwanted_images = []
 
     for item, test_img in enumerate(
@@ -72,9 +71,5 @@ def get_image_comparison(
     print(
         f"Количество лишних изображений согласно предсказаниям: {len(unwanted_images)}"
     )
-
-    end_time = time.time()
-    final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-    print(f"Время выполнения: {final_time}")
 
     return unwanted_images

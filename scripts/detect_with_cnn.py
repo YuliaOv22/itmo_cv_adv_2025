@@ -60,11 +60,8 @@ class TransformerEmbedder:
         test_paths: List[Path],
         threshold: float = 0.95,
     ) -> List[str]:
-        """
-        Находит лишние тестовые изображения по предвычисленным эмбеддингам
+        """Находит лишние тестовые изображения по предвычисленным эмбеддингам"""
 
-        """
-        start_time = time.time()
         unwanted_images = []
 
         train_embs = list(train_embeddings.values())
@@ -84,7 +81,4 @@ class TransformerEmbedder:
             f"Количество лишних изображений согласно предсказаниям: {len(unwanted_images)}"
         )
 
-        end_time = time.time()
-        final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-        print(f"Время выполнения: {final_time}")
         return unwanted_images

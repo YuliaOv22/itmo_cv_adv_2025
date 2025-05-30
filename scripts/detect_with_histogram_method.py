@@ -37,13 +37,12 @@ def _compute_color_histogram(image_path: Path, hist_size: int = 32) -> np.ndarra
 def get_histogram_comparison(
     train_hists: list[np.ndarray],
     test_hists: list[np.ndarray],
-    test_paths: list[Path],    
+    test_paths: list[Path],
     threshold: float = 0.85,
     method: str = "correl",
 ) -> list[Path]:
     """Сравнивает изображения из папок train и test с использованием гистограмм."""
 
-    start_time = time.time()
     unwanted_images = []
 
     for item, test_hist in enumerate(
@@ -79,9 +78,5 @@ def get_histogram_comparison(
     print(
         f"Количество лишних изображений согласно предсказаниям: {len(unwanted_images)}"
     )
-
-    end_time = time.time()
-    final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-    print(f"Время выполнения: {final_time}")
 
     return unwanted_images

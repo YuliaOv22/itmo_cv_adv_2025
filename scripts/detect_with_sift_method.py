@@ -74,13 +74,16 @@ def get_image_comparison(
 
         if found:
             continue
+    
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        if elapsed_time > 1000:
+            print("Время выполнения превысило 1000 секунд. Прерывание выполнения.")
+            break
 
     print(
         f"Количество лишних изображений согласно предсказаниям: {len(unwanted_images)}"
     )
 
-    end_time = time.time()
-    final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-    print(f"Время выполнения: {final_time}")
 
     return unwanted_images

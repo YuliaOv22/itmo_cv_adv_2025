@@ -2,7 +2,6 @@ from PIL import Image
 from pathlib import Path
 from typing import List
 import imagehash
-import time
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
@@ -55,7 +54,6 @@ def get_image_comparison(
     comparison_method: str,
 ) -> List[Path]:
     """Сравнивает изображения из папок train и test с использованием указанного метода сравнения."""
-    start_time = time.time()
 
     unwanted_images = []
 
@@ -88,9 +86,5 @@ def get_image_comparison(
     print(
         f"Количество лишних изображений согласно предсказаниям: {len(unwanted_images)}"
     )
-
-    end_time = time.time()
-    final_time = time.strftime("%M:%S", time.gmtime(end_time - start_time))
-    print(f"Время выполнения: {final_time}")
 
     return unwanted_images
